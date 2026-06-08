@@ -82,7 +82,7 @@ app.post('/api/login', (req, res) => {
     const students = readJSON(STUDENTS_FILE);
     
     if (role === 'admin') {
-        if (username === 'admin' && password === 'admin123') {
+        if (username === 'admin' && password === 'Assim2018') {
             req.session.userId = 1;
             req.session.role = 'admin';
             return res.json({ success: true, role: 'admin' });
