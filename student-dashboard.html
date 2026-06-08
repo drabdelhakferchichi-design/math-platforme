@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mon Espace - Dr. Abdelhak Ferchichi</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); min-height: 100vh; padding: 20px; }
+        .container { max-width: 1200px; margin: 0 auto; }
+        
+        /* Header */
+        .header { background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%); color: white; padding: 20px 30px; border-radius: 15px; margin-bottom: 25px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; }
+        .course-badge { background: #ffd700; color: #1e3c72; padding: 5px 15px; border-radius: 20px; font-weight: bold; display: inline-block; margin-top: 5px; }
+        .logout-btn { background: #dc3545; color: white; border: none; padding: 10px 20px; border-radius: 8px; cursor: pointer; font-weight: bold; }
+        
+        /* Navigation */
+        .nav-tabs { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 25px; }
+        .tab-btn { background: white; border: none; padding: 12px 24px; border-radius: 8px; cursor: pointer; font-weight: bold; transition: all 0.3s; }
+        .tab-btn.active { background: #667eea; color: white; }
+        
+        /* Panels */
+        .panel { background: white; border-radius: 15px; padding: 25px; margin-bottom: 25px; display: none; box-shadow: 0 5px 15px rgba(0,0,0,0.1); }
+        .panel.active { display: block; }
+        .panel-title { color: #1e3c72; margin-bottom: 20px; border-bottom: 3px solid #667eea; padding-bottom: 10px; font-size: 1.4em; }
+        
+        /* Cards */
+        .material-card { background: #f8f9fa; border-radius: 10px; padding: 15px; margin-bottom: 15px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; transition: transform 0.2s; }
+        .material-card:hover { transform: translateX(5px); }
+        .btn-join { background: #28a745; color: white; border: none; padding: 8px 20px; border-radius: 5px; cursor: pointer; font-weight: bold; }
+        .btn-watch { background: #ffc107; color: #333; border: none; padding: 8px 20px; border-radius: 5px; cursor: pointer; font-weight: bold; }
+        .btn-download { background: #667eea; color: white; border: none; padding: 8px 20px; border-radius: 5px; cursor: pointer; font-weight: bold; }
+        .btn-submit { background: #17a2b8; color: white; border: none; padding: 8px 20px; border-radius: 5px; cursor: pointer; font-weight: bold; }
+        
+        /* Formulaires */
+        .form-group { margin-bottom: 20px; }
+        .form-group label { display: block; font-weight: bold; margin-bottom: 8px; color: #333; }
+        .form-group input, .form-group textarea { width: 100%; padding: 12px; border: 2px solid #ddd; border-radius: 8px; font-size: 14px; }
+        .form-group textarea { resize: vertical; min-height: 100px; }
+        .upload-area { border: 2px dashed #667eea; border-radius: 10px; padding: 20px; text-align: center; background: #f8f9fa; cursor: pointer; margin-bottom: 15px; transition: all 0.3s; }
+        .upload-area:hover { background: #e9ecef; border-color: #28a745; }
+        
+        /* Messages */
+        .message-card { background: #f8f9fa; border-radius: 10px; padding: 15px; margin-bottom: 15px; border-left: 5px solid #17a2b8; }
+        .homework-item { background: #f8f9fa; padding: 15px; margin: 10px 0; border-radius: 8px; border-left: 5px solid #ffc107; }
+        .empty { text-align: center; padding: 40px; color: #999; }
+        
+        /* Alertes */
+        .alert { padding: 15px; border-radius: 8px; margin-top: 15px; display: none; }
+        .alert.success { background: #d4edda; color: #155724; display: block; }
+        .alert.error { background: #f8d7da; color: #721c24; display: block; }
+        
+        @media (max-width: 768px) { .material-card { flex-direction: column; gap: 10px; text-align: center; } .nav-tabs button { width: 100%; } }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div>
+                <h1>📚 Mon Espace d'Apprentissage</h1>
+                <div id="studentName"></div>
+                <div id="studentCourse" class="course-badge"></div>
+            </div>
+            <button class="logout-btn" onclick="logout()">🔓 Déconnexion</button>
+        </div>
+
+        <div class="nav-tabs">
+            <button class="tab-btn active" onclick="showTab('courses')">📚 Mes cours</button>
+            <button class="tab-btn" onclick="showTab('homework')">📝 Mes devoirs</button>
+            <button class="tab-btn" onclick="showTab('messages')">💬 Messages</button>
+        </div>
+
+        <!-- ============ PANEL 1: MES COURS ============ -->
+        <div id="coursesPanel" class="panel active">
+            <h2 class="panel-title">🎥 Sessions à venir</h2>
+            <div id="sessionsList"></div>
+            
+            <h2 class="panel-title">📼 Sessions passées (Replays)</h2>
+            <div id="pastSessionsList"></div>
+            
+            <h2 class="panel-title">📝 Worksheets</h2>
+            <div id="worksheetsList"></div>
+            
+            <h2 class="panel-title">📄 Past Papers</h2>
+            <div id="pastpapersList"></div>
+        </div>
+
+        <!-- ============ PANEL 2: MES DEVOIRS ============ -->
+        <div id="homeworkPanel" class="panel">
+            <h2 class="panel-title">📤 Rendre un devoir</h2>
+            <div class="form-group"><label>Titre du devoir</label><input type="text" id="homeworkTitle" placeholder="Ex: Exercices Algèbre"></div>
+            <div class="form-group"><label>Description</label><textarea id="homeworkDesc" placeholder="Décrivez votre devoir..."></textarea></div>
+            <div class="upload-area" onclick="document.getElementById('homeworkFile').click()">📁 Cliquez pour sélectionner un fichier (PDF)</div>
+            <input type="file" id="homeworkFile" accept=".pdf" style="display:none;">
+            <button class="btn-submit" onclick="submitHomework()">📤 Rendre le devoir</button>
+            <div id="submitResult" class="alert"></div>
+            
+            <h2 class="panel-title" style="margin-top:30px;">📋 Mes devoirs rendus</h2>
+            <div id="myHomeworkList"></div>
+        </div>
+
+        <!-- ============ PANEL 3: MESSAGES ============ -->
+        <div id="messagesPanel" class="panel">
+            <h2 class="panel-title">💬 Messages</h2>
+            <button class="btn-submit" onclick="loadMessages()" style="margin-bottom:15px;">🔄 Actualiser</button>
+            <div id="messagesList"></div>
+            <hr style="margin:20px 0;">
+            <h3>📧 Envoyer un message au professeur</h3>
+            <div class="form-group"><label>Sujet</label><input type="text" id="messageSubject" placeholder="Sujet de votre message"></div>
+            <div class="form-group"><label>Message</label><textarea id="messageContent" rows="4" placeholder="Écrivez votre message ici..."></textarea></div>
+            <button class="btn-submit" onclick="sendMessage()">📧 Envoyer</button>
+            <div id="sendResult" class="alert"></div>
+        </div>
+    </div>
+
+    <script>
+        let studentData = null;
+
+        // ============ VÉRIFICATION SESSION ============
+        async function checkSession() { 
+            const res = await fetch('/api/check-session'); 
+            const data = await res.json(); 
+            if (!data.loggedIn || data.role !== 'student') window.location.href = 'index.html'; 
+        }
+        checkSession();
+
+        // ============ CHARGEMENT DES DONNÉES ============
+        async function loadStudentData() {
+            try {
+                const res = await fetch('/api/student/materials');
+                const data = await res.json();
+                studentData = data;
+                document.getElementById('studentName').innerHTML = `👋 Bienvenue, ${data.student.name}`;
+                document.getElementById('studentCourse').innerHTML = `${data.student.courseName}`;
+                
+                // Sessions à venir
+                const upcomingSessions = data.materials.sessions || [];
+                document.getElementById('sessionsList').innerHTML = upcomingSessions.length ? 
+                    upcomingSessions.map(s => `<div class="material-card"><div><strong>${s.title}</strong><br>📅 ${s.date} à ${s.time}</div><button class="btn-join" onclick="window.open('${s.link}','_blank')">🔗 Rejoindre</button></div>`).join('') : 
+                    '<div class="empty">📭 Aucune session programmée pour le moment</div>';
+                
+                // Sessions passées (replays)
+                const pastSessions = data.materials.pastSessions || [];
+                document.getElementById('pastSessionsList').innerHTML = pastSessions.length ? 
+                    pastSessions.map(s => `<div class="material-card"><div><strong>${s.title}</strong><br>📅 ${s.date}</div><button class="btn-watch" onclick="window.open('${s.link}','_blank')">📼 Voir le replay</button></div>`).join('') : 
+                    '<div class="empty">📭 Aucune session passée disponible</div>';
+                
+                // Worksheets
+                const worksheets = data.materials.worksheets || [];
+                document.getElementById('worksheetsList').innerHTML = worksheets.length ? 
+                    worksheets.map(w => `<div class="material-card"><div><strong>${w.title}</strong></div><button class="btn-download" onclick="window.open('${w.link}','_blank')">⬇️ Télécharger</button></div>`).join('') : 
+                    '<div class="empty">📭 Aucune worksheet disponible</div>';
+                
+                // Past Papers
+                const pastpapers = data.materials.pastpapers || [];
+                document.getElementById('pastpapersList').innerHTML = pastpapers.length ? 
+                    pastpapers.map(p => `<div class="material-card"><div><strong>${p.title}</strong><br>📅 Année: ${p.year}</div><button class="btn-download" onclick="window.open('${p.link}','_blank')">⬇️ Télécharger</button></div>`).join('') : 
+                    '<div class="empty">📭 Aucun past paper disponible</div>';
+            } catch(e) { console.error(e); }
+        }
+
+        // ============ DEVOIRS ============
+        async function loadMyHomework() {
+            try {
+                const res = await fetch('/api/my-homework');
+                const homework = await res.json();
+                const container = document.getElementById('myHomeworkList');
+                if (!homework || homework.length === 0) { 
+                    container.innerHTML = '<div class="empty">📭 Aucun devoir rendu</div>'; 
+                    return; 
+                }
+                container.innerHTML = homework.map(h => `
+                    <div class="homework-item">
+                        <strong>${h.title}</strong><br>
+                        ${h.description || ''}<br>
+                        <a href="${h.fileUrl}" target="_blank">📎 Voir mon devoir</a><br>
+                        <strong>Statut:</strong> ${h.status === 'graded' ? '✅ Corrigé' : '⏳ En attente de correction'}<br>
+                        ${h.grade ? `<strong>Note:</strong> ${h.grade}/20<br>` : ''}
+                        ${h.feedback ? `<strong>Feedback:</strong> ${h.feedback}` : ''}
+                    </div>
+                `).join('');
+            } catch(e) { console.error(e); }
+        }
+
+        async function submitHomework() {
+            const title = document.getElementById('homeworkTitle').value;
+            const description = document.getElementById('homeworkDesc').value;
+            const file = document.getElementById('homeworkFile').files[0];
+            const resultDiv = document.getElementById('submitResult');
+            
+            if (!title || !file) {
+                resultDiv.innerHTML = '❌ Veuillez entrer un titre et sélectionner un fichier';
+                resultDiv.className = 'alert error';
+                setTimeout(() => resultDiv.style.display = 'none', 3000);
+                return;
+            }
+            
+            const formData = new FormData();
+            formData.append('title', title);
+            formData.append('description', description);
+            formData.append('file', file);
+            
+            resultDiv.innerHTML = '⏳ Envoi en cours...';
+            resultDiv.className = 'alert';
+            resultDiv.style.display = 'block';
+            
+            try {
+                const res = await fetch('/api/submit-homework', { method: 'POST', body: formData });
+                const result = await res.json();
+                if (result.success) {
+                    resultDiv.innerHTML = '✅ Devoir envoyé avec succès !';
+                    resultDiv.className = 'alert success';
+                    document.getElementById('homeworkTitle').value = '';
+                    document.getElementById('homeworkDesc').value = '';
+                    document.getElementById('homeworkFile').value = '';
+                    loadMyHomework();
+                } else {
+                    resultDiv.innerHTML = '❌ Erreur lors de l\'envoi';
+                    resultDiv.className = 'alert error';
+                }
+            } catch(e) {
+                resultDiv.innerHTML = '❌ Erreur réseau';
+                resultDiv.className = 'alert error';
+            }
+            setTimeout(() => resultDiv.style.display = 'none', 3000);
+        }
+
+        // ============ MESSAGES ============
+        async function loadMessages() {
+            try {
+                const res = await fetch('/api/messages');
+                const messages = await res.json();
+                const container = document.getElementById('messagesList');
+                if (!messages || messages.length === 0) { 
+                    container.innerHTML = '<div class="empty">📭 Aucun message</div>'; 
+                    return; 
+                }
+                container.innerHTML = messages.map(m => `
+                    <div class="message-card">
+                        <strong>${m.fromName}</strong> - ${new Date(m.date).toLocaleString()}<br>
+                        <strong>Sujet:</strong> ${m.subject}<br>
+                        <strong>Message:</strong> ${m.message}
+                    </div>
+                `).join('');
+            } catch(e) { console.error(e); }
+        }
+
+        async function sendMessage() {
+            const subject = document.getElementById('messageSubject').value;
+            const message = document.getElementById('messageContent').value;
+            const resultDiv = document.getElementById('sendResult');
+            
+            if (!subject || !message) {
+                resultDiv.innerHTML = '❌ Veuillez remplir tous les champs';
+                resultDiv.className = 'alert error';
+                setTimeout(() => resultDiv.style.display = 'none', 3000);
+                return;
+            }
+            
+            try {
+                const res = await fetch('/api/send-message', { 
+                    method: 'POST', 
+                    headers: { 'Content-Type': 'application/json' }, 
+                    body: JSON.stringify({ toId: 1, subject, message }) 
+                });
+                if (res.ok) {
+                    resultDiv.innerHTML = '✅ Message envoyé au professeur !';
+                    resultDiv.className = 'alert success';
+                    document.getElementById('messageSubject').value = '';
+                    document.getElementById('messageContent').value = '';
+                    loadMessages();
+                } else {
+                    resultDiv.innerHTML = '❌ Erreur lors de l\'envoi';
+                    resultDiv.className = 'alert error';
+                }
+            } catch(e) {
+                resultDiv.innerHTML = '❌ Erreur réseau';
+                resultDiv.className = 'alert error';
+            }
+            setTimeout(() => resultDiv.style.display = 'none', 3000);
+        }
+
+        // ============ NAVIGATION ============
+        function showTab(tabName) {
+            document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+            document.getElementById(tabName + 'Panel').classList.add('active');
+            event.target.classList.add('active');
+            if (tabName === 'homework') loadMyHomework();
+            if (tabName === 'messages') loadMessages();
+        }
+
+        // ============ DÉCONNEXION ============
+        async function logout() { 
+            await fetch('/api/logout', { method: 'POST' }); 
+            window.location.href = 'index.html'; 
+        }
+
+        // Chargement initial
+        loadStudentData();
+    </script>
+</body>
+</html>
